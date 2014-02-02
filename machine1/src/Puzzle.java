@@ -1,30 +1,29 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 
 
 public class Puzzle {
-	
-	String[][] board;
-	int size;
-	int emptyX;
-	int emptyY;
+	private Node root;
+	private int size;
 	
 	public static void main (String args[]){
 		Puzzle puzzle = new Puzzle();
 		try {
-			puzzle.board = puzzle.getBoard(args[0]);
+			puzzle.root = puzzle.getRoot(args[0]);
 		} catch (IOException e) {
 			System.out.println(e);
 		}
-		puzzle.printBoard();
-		System.out.println(puzzle.calculateHeuristics());
+
+//		System.out.println(puzzle.root.toString());
+		puzzle.solve();
+		
 	}
 	
 		
-	private String[][] getBoard(String filename) throws IOException{
+	private Node getRoot(String filename) throws IOException{
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		String line = br.readLine();
 		size = line.split(" ").length;
@@ -34,47 +33,164 @@ public class Puzzle {
 			String row[] = line.split(" ");
 			for (int i = 0; i < row.length; i++) {
 				board[j][i] = row[i];
-				if(row[i].equals("X")){
-					emptyX = i;
-					emptyY = j;
-				}
 			}
 			line = br.readLine();
 			j++;
 		}
 		br.close();
-		return board;
+		Node root = new Node(board);
+		return root;
 	}
 	
 	
-	private void printBoard(){
-		for (int i = 0; i < board.length; i++) {
-			System.out.println(Arrays.toString(board[i]));
+	public String[][] cloneBoard(String[][] board) {
+	    String[][] result = new String[this.size][this.size];
+	    for (int i = 0; i < this.size; i++) {
+	        System.arraycopy(board[i], 0, result[i], 0, this.size);
+	    }
+	    return result;
+	}
+	
+	private Node moveLeft(Node node){
+		if(node.getXposX()<=0){
+			return null;			
 		}
-		System.out.println("X: "+emptyX+", Y: "+emptyY);
-	}
-	
-	
-	
-	private int calculateHeuristics(){
-		int numDist = 0;
-		int total = 0;
-		for (int y = 0; y < board.length; y++) {
-			for (int x = 0; x < board.length; x++) {
-				String piece = board[y][x];
-				if (piece.equals("X")) {
-					numDist = 0;
-				}
-				else{
-					int number = Integer.parseInt(piece);
-					int goalX = (number-1) % size;
-					int goalY = (int)Math.floor(number/size);
-					numDist = Math.abs(x-goalX)+Math.abs(y-goalY);
-				}
-				total+=numDist;
-			}
+		else{
+			String[][] board = cloneBoard(node.getBoard());
+			board[node.getXposY()][node.getXposX()-1] = node.getBoard()[node.getXposY()][node.getXposX()];
+			board[node.getXposY()][node.getXposX()] = node.getBoard()[node.getXposY()][node.getXposX()-1];
+			Node left = new Node(board);
+			left.setDirection('l');
+			return left;
 		}
-		return total;
 	}
+	
+	private Node moveRight(Node node){
+		if(node.getXposX()>=this.size-1){
+			return null;			
+		}
+		else{
+			String[][] board = cloneBoard(node.getBoard());
+			board[node.getXposY()][node.getXposX()+1] = node.getBoard()[node.getXposY()][node.getXposX()];
+			board[node.getXposY()][node.getXposX()] = node.getBoard()[node.getXposY()][node.getXposX()+1];
+			Node right = new Node(board);
+			right.setDirection('r');
+			return right;
+		}
+	}
+	
+	private Node moveUp(Node node){
+		if(node.getXposY()<=0){
+			return null;			
+		}
+		else{
+			String[][] board = cloneBoard(node.getBoard());
+			board[node.getXposY()-1][node.getXposX()] = node.getBoard()[node.getXposY()][node.getXposX()];
+			board[node.getXposY()][node.getXposX()] = node.getBoard()[node.getXposY()-1][node.getXposX()];
+			Node up = new Node(board);
+			up.setDirection('u');
+			return up;
+		}
+	}
+	
+	private Node moveDown(Node node){
+		if(node.getXposY()>=this.size-1){
+			return null;			
+		}
+		else{
+			String[][] board = cloneBoard(node.getBoard());
+			board[node.getXposY()+1][node.getXposX()] = node.getBoard()[node.getXposY()][node.getXposX()];
+			board[node.getXposY()][node.getXposX()] = node.getBoard()[node.getXposY()+1][node.getXposX()];
+			Node down = new Node(board);
+			down.setDirection('d');
+			return down;
+		}
+	}
+	
+	private ArrayList<Node> generateChilderen(Node node){
+		ArrayList<Node> childeren = new ArrayList<Node>();
+		Node right = this.moveRight(node);
+		if(right!=null){
+			childeren.add(right);
+			right.setG(node.getG()+1);
+		};
+		Node left = this.moveLeft(node);
+		if(left!=null){
+			childeren.add(left);
+			left.setG(node.getG()+1);
+		};
+		Node up = this.moveUp(node);
+		if(up!=null){
+			childeren.add(up);
+			up.setG(node.getG()+1);
+		};
+		Node down = this.moveDown(node);
+		if(down!=null){
+			childeren.add(down);
+			down.setG(node.getG()+1);
+		};
+		return childeren;
+	}
+
+	
+	private void solve(){
+		ArrayList<Node> open = new ArrayList<Node>();
+		ArrayList<Node> closed = new ArrayList<Node>();
+		open.add(root);
 		
+		while(!open.isEmpty()){
+			int minF = Integer.MAX_VALUE;
+			Node node_current = null;
+			
+			// Find Node with lowest F value in Open-list
+			for (Node node : open) {
+				if(node.getF()<=minF){
+					minF = node.getF();
+					node_current = node;
+				}
+			}
+			System.out.println(node_current.toString()); 						// Testprint
+			System.out.println("****** Children: ******");						// Testprint
+			
+			// If Heuristic is equal to zero, we have fount the solution
+			if(node_current.getH()<=0){
+				StringBuilder solution = new StringBuilder();
+				closed.add(node_current);
+				for (Node node_path : closed) {
+					solution.append(node_path.getDirection());
+				}
+				System.out.println(solution.toString());
+				System.out.println(closed.toString());
+				break;
+			}
+			
+			// If this is not the solution, check all the possible children
+			for (Node child : generateChilderen(node_current)) {
+				System.out.println(child.toString()); 							// Testprint
+				if(open.contains(child)){
+					if (node_current.getF()<=child.getF()) {
+						break;
+					}
+					else{
+						open.remove(child);
+					}
+				}
+				if (closed.contains(child)) {
+					if (node_current.getF()<=child.getF()) {
+						break;
+					}
+					else{
+						open.remove(child);
+					}
+				}
+				child.setParent(node_current);
+				open.add(child);
+			}
+			closed.add(node_current);
+			System.out.println("************************");						// Testprint
+		}
+		
+	}
+	
+	
 }
