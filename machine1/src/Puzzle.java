@@ -17,7 +17,7 @@ public class Puzzle {
 			System.out.println(e);
 		}
 
-//		System.out.println(puzzle.root.toString());
+		//System.out.println(puzzle.root.toString());
 		puzzle.solve();
 		
 	}
@@ -134,6 +134,7 @@ public class Puzzle {
 
 	
 	private void solve(){
+		final long startTimer = System.nanoTime();
 		ArrayList<Node> open = new ArrayList<Node>();
 		ArrayList<Node> closed = new ArrayList<Node>();
 		open.add(root);
@@ -149,45 +150,42 @@ public class Puzzle {
 					node_current = node;
 				}
 			}
-			System.out.println(node_current.toString()); 						// Testprint
-			System.out.println("****** Children: ******");						// Testprint
 			
 			// If Heuristic is equal to zero, we have fount the solution
+			// Go through in reverse order, and print solution
 			if(node_current.getH()<=0){
+				final long duration = System.nanoTime() - startTimer;
+			    final double timer = ((double)duration / 1000000000);
 				StringBuilder solution = new StringBuilder();
-				closed.add(node_current);
-				for (Node node_path : closed) {
-					solution.append(node_path.getDirection());
+				while(node_current.getParent()!=null){
+					solution.append(node_current.getDirection());
+					node_current = node_current.getParent();
 				}
+				solution = solution.reverse();
 				System.out.println(solution.toString());
-				System.out.println(closed.toString());
+				//System.out.println("Moves: " + (solution.length()));
+				System.out.println((int)timer + " seconds");
 				break;
 			}
 			
 			// If this is not the solution, check all the possible children
-			for (Node child : generateChilderen(node_current)) {
-				System.out.println(child.toString()); 							// Testprint
-				if(open.contains(child)){
-					if (node_current.getF()<=child.getF()) {
-						break;
-					}
-					else{
-						open.remove(child);
-					}
-				}
-				if (closed.contains(child)) {
-					if (node_current.getF()<=child.getF()) {
-						break;
-					}
-					else{
-						open.remove(child);
-					}
-				}
-				child.setParent(node_current);
-				open.add(child);
-			}
+			open.remove(node_current);
 			closed.add(node_current);
-			System.out.println("************************");						// Testprint
+			for (Node child : generateChilderen(node_current)) {
+				// If node is allready visited, do not visit again
+				if (closed.contains(child)) {
+					break;
+				}
+				// If node is not in the queue or the current node 
+				if(!open.contains(child) || (node_current.getG()+1)<child.getG()){
+					child.setParent(node_current);        //set this node as parent
+					child.setG(node_current.getG()+1);    //set G-value to current+1
+					if(!open.contains(child)){            //if this is a child, not in the queue, add it
+						open.add(child);
+					}
+				}
+				
+			}
 		}
 		
 	}
