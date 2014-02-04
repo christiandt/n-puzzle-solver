@@ -12,12 +12,14 @@ public class Node {
 	private int g = 0;
 	private int h;
 	
+	// Constructor sets the board (&X-position&size), and calculates the heuristic
 	public Node(String[][] board){
 		size = board.length;
 		this.board = board;
 		calculateHeuristics();
 	}
 	
+	// The heuristic-function for the nodes, using Manhattan-distance
 	private void calculateHeuristics(){
 		int numDist = 0;
 		int total = 0;
@@ -27,14 +29,13 @@ public class Node {
 				if (piece.equals("X")) {
 					this.xposX=x;
 					this.xposY=y;
-					
-					numDist = Math.abs(x-(this.size-1))+Math.abs(y-(this.size-1));
+					numDist = Math.abs(x-(this.size-1)) + Math.abs(y-(this.size-1));
 				}
 				else{
 					int number = Integer.parseInt(piece);
 					int goalX = (number-1) % this.size;
 					int goalY = (int)Math.floor((number-1)/this.size);
-					numDist = Math.abs(x-goalX)+Math.abs(y-goalY);
+					numDist = Math.abs(x-goalX) + Math.abs(y-goalY);
 				}
 				total+=numDist;
 			}
@@ -59,7 +60,7 @@ public class Node {
 	}
 	
 	public int getF(){
-		return this.g+this.h;
+		return this.g + this.h;
 	}
 	
 	public int getH(){

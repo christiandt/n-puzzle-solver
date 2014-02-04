@@ -8,9 +8,9 @@ import java.util.ArrayList;
 
 
 public class Puzzle {
+	private BufferedWriter out;
 	private Node root;
 	private int size;
-	private BufferedWriter out;
 	
 	public static void main (String args[]){
 		Puzzle puzzle = new Puzzle();
@@ -22,7 +22,7 @@ public class Puzzle {
 		}
 	}
 	
-		
+	// Read the given file and create the root-node
 	private Node getRoot(String filename) throws IOException{
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		String line = br.readLine();
@@ -42,7 +42,7 @@ public class Puzzle {
 		return root;
 	}
 	
-	
+	// Helper-method to make a copy of the 2D board
 	public String[][] cloneBoard(String[][] board) {
 	    String[][] result = new String[this.size][this.size];
 	    for (int i = 0; i < this.size; i++) {
@@ -51,6 +51,7 @@ public class Puzzle {
 	    return result;
 	}
 	
+	// Move X in left-direction and return the subsequent Node-object
 	private Node moveLeft(Node node){
 		if(node.getXposX()<=0){
 			return null;			
@@ -65,6 +66,7 @@ public class Puzzle {
 		}
 	}
 	
+	// Move X in right-direction and return the subsequent Node-object
 	private Node moveRight(Node node){
 		if(node.getXposX()>=this.size-1){
 			return null;			
@@ -79,6 +81,7 @@ public class Puzzle {
 		}
 	}
 	
+	// Move X in upward-direction and return the subsequent Node-object
 	private Node moveUp(Node node){
 		if(node.getXposY()<=0){
 			return null;			
@@ -93,6 +96,7 @@ public class Puzzle {
 		}
 	}
 	
+	// Move X in downward-direction and return the subsequent Node-object
 	private Node moveDown(Node node){
 		if(node.getXposY()>=this.size-1){
 			return null;			
@@ -107,6 +111,7 @@ public class Puzzle {
 		}
 	}
 	
+	// Returns all the possible children for the given node
 	private ArrayList<Node> generateChilderen(Node node){
 		ArrayList<Node> childeren = new ArrayList<Node>();
 		Node right = this.moveRight(node);
@@ -132,7 +137,7 @@ public class Puzzle {
 		return childeren;
 	}
 
-	
+	// Find the solution using A-star
 	private void solve(String output) throws IOException{
 		this.out = new BufferedWriter(new FileWriter(output));
 		final long startTimer = System.nanoTime();
