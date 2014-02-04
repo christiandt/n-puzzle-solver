@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -8,18 +10,16 @@ import java.util.ArrayList;
 public class Puzzle {
 	private Node root;
 	private int size;
+	private BufferedWriter out;
 	
 	public static void main (String args[]){
 		Puzzle puzzle = new Puzzle();
 		try {
 			puzzle.root = puzzle.getRoot(args[0]);
+			puzzle.solve(args[1]);
 		} catch (IOException e) {
 			System.out.println(e);
 		}
-
-		//System.out.println(puzzle.root.toString());
-		puzzle.solve();
-		
 	}
 	
 		
@@ -133,7 +133,8 @@ public class Puzzle {
 	}
 
 	
-	private void solve(){
+	private void solve(String output) throws IOException{
+		this.out = new BufferedWriter(new FileWriter(output));
 		final long startTimer = System.nanoTime();
 		ArrayList<Node> open = new ArrayList<Node>();
 		ArrayList<Node> closed = new ArrayList<Node>();
@@ -142,6 +143,13 @@ public class Puzzle {
 		while(!open.isEmpty()){
 			int minF = Integer.MAX_VALUE;
 			Node node_current = null;
+			
+			// Make sure the program ends if 30 minutes has passed
+			if((System.nanoTime() - startTimer)/1000000000>=1800){
+				this.out.write("Program ended due to 30 minute time limit");
+				this.out.close();
+				System.exit(0);
+			}
 			
 			// Find Node with lowest F value in Open-list
 			for (Node node : open) {
@@ -162,9 +170,11 @@ public class Puzzle {
 					node_current = node_current.getParent();
 				}
 				solution = solution.reverse();
-				System.out.println(solution.toString());
+				this.out.write(solution.toString());
+				this.out.newLine();
 				//System.out.println("Moves: " + (solution.length()));
-				System.out.println((int)timer + " seconds");
+				this.out.write((int)timer + " seconds");
+				this.out.close();
 				break;
 			}
 			
@@ -187,7 +197,6 @@ public class Puzzle {
 				
 			}
 		}
-		
 	}
 	
 	
