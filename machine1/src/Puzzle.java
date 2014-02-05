@@ -112,7 +112,7 @@ public class Puzzle {
 	}
 	
 	// Returns all the possible children for the given node
-	private ArrayList<Node> generateChilderen(Node node){
+	private ArrayList<Node> generateChildren(Node node){
 		ArrayList<Node> childeren = new ArrayList<Node>();
 		Node right = this.moveRight(node);
 		if(right!=null){
@@ -186,12 +186,12 @@ public class Puzzle {
 			// If this is not the solution, check all the possible children
 			open.remove(node_current);
 			closed.add(node_current);
-			for (Node child : generateChilderen(node_current)) {
-				// If node is allready visited, do not visit again
+			for (Node child : generateChildren(node_current)) {
+				// If node is already visited, do not visit again
 				if (closed.contains(child)) {
 					break;
 				}
-				// If node is not in the queue or the current node 
+
 				if(!open.contains(child) || (node_current.getG()+1)<child.getG()){
 					child.setParent(node_current);        //set this node as parent
 					child.setG(node_current.getG()+1);    //set G-value to current+1
