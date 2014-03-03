@@ -21,17 +21,17 @@ program. It handles input/output, moving, solving and structuring the
 tree. The basic structure of the class consists of tree parts: 
 
 1. reading input:
-    getRoot(String filename)
+    - getRoot(String filename)
 
 2. finding/creating children: 
-    generateChildren(Node node)
-    moveLeft(Node node)
-    moveRight(Node node)
-    moveUp(Node node)
-    moveDown(Node node)
+    - generateChildren(Node node)
+    - moveLeft(Node node)
+    - moveRight(Node node)
+    - moveUp(Node node)
+    - moveDown(Node node)
 
 3. solving the problem:
-    solve(String output)
+    - solve(String output)
 
 The cloneBoard-method is used as a helper-method to copy the 2D-board 
 instead of creating a reference to the same board.
